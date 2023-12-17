@@ -7,6 +7,10 @@ const app = express();
 app.use(cors());
 app.use(morgan('dev'));
 
+app.get('/', async (req, res) => {
+  res.send(`I'm alive yay... 🙃🙃🙃`);
+});
+
 app.get('/api/v1/users', async (req, res) => {
   const { page, size } = req.query;
 
