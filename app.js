@@ -11,7 +11,7 @@ app.get('/', async (req, res) => {
   res.send(`I'm alive yay... 🙃🙃🙃`);
 });
 
-app.get('/api/v1/users', async (req, res) => {
+app.get('/api/v1/users', (req, res) => {
   const { page, size } = req.query;
 
   const skip = !isNaN(Number(page)) ? Number(page) : 1;
@@ -26,7 +26,31 @@ app.get('/api/v1/users', async (req, res) => {
     data,
     page: skip,
     size: limit,
-    count: userData.length
+    count: userData.length,
+    message: 'users fetched successfully'
+  });
+});
+
+app.get('/api/v1/users/:id', (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({
+      message: 'invalid id passed'
+    });
+  }
+
+  const data = userData.find(({ id: userId }) => userId === id);
+
+  if (!data) {
+    return res.status(404).json({
+      message: 'user not found'
+    });
+  }
+
+  return res.status(200).json({
+    data,
+    message: 'user fetched successfully'
   });
 });
 
