@@ -37,8 +37,8 @@ app.get('/api/v1/users', (req, res) => {
   }
 
   if (username) {
-    data = data.filter(
-      (datum) => datum.username.toLowerCase() === username.toLowerCase()
+    data = data.filter((datum) =>
+      datum.username.toLowerCase().includes(username.toLowerCase())
     );
   }
 
@@ -47,8 +47,8 @@ app.get('/api/v1/users', (req, res) => {
   }
 
   if (email) {
-    data = data.filter(
-      (datum) => datum.email.toLowerCase() === email.toLowerCase()
+    data = data.filter((datum) =>
+      datum.email.toLowerCase().indexOf(email.toLowerCase())
     );
   }
 
