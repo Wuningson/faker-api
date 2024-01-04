@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const userData = require('./user-data.json');
+const moment = require('moment');
 
 const app = express();
 app.use(cors());
@@ -12,7 +13,16 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/api/v1/users', (req, res) => {
-  const { page, size } = req.query;
+  const {
+    page,
+    size,
+    organization,
+    username,
+    email,
+    date,
+    phoneNumber,
+    status
+  } = req.query;
 
   const skip = !isNaN(Number(page)) ? Number(page) : 1;
   const limit = !isNaN(Number(size)) ? Number(size) : 10;
@@ -20,13 +30,44 @@ app.get('/api/v1/users', (req, res) => {
   const start = (skip - 1) * limit;
   const end = start + limit;
 
-  const data = userData.slice(start, end);
+  let data = userData;
+
+  if (organization) {
+    data = data.filter((datum) => datum.organization === organization);
+  }
+
+  if (username) {
+    data = data.filter((datum) => datum.username === username);
+  }
+
+  if (status) {
+    data = data.filter((datum) => datum.status === status);
+  }
+
+  if (email) {
+    data = data.filter((datum) => datum.email === email);
+  }
+
+  if (date) {
+    data = data.filter((datum) => {
+      const start = moment(date).startOf('day');
+      const end = moment(date).endOf('day');
+
+      return moment(datum.dateJoined).isBetween(start, end);
+    });
+  }
+
+  if (phoneNumber) {
+    data = data.filter((datum) => datum.phoneNumber === phoneNumber);
+  }
+
+  const result = data.slice(start, end);
 
   return res.status(200).json({
-    data,
     page: skip,
     size: limit,
-    count: userData.length,
+    data: result,
+    count: data.length,
     message: 'users fetched successfully'
   });
 });
@@ -51,6 +92,20 @@ app.get('/api/v1/users/:id', (req, res) => {
   return res.status(200).json({
     data,
     message: 'user fetched successfully'
+  });
+});
+
+app.get('/api/v1/organizations', (req, res) => {
+  const organizations = [];
+  userData.forEach((datum) => {
+    organizations.push(datum.organization);
+  });
+
+  const result = Array.from(new Set(organizations));
+
+  return res.status(200).json({
+    data: result,
+    message: 'organizations fetched successfully'
   });
 });
 
